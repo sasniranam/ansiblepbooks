@@ -1,0 +1,15 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   vars:
+    users:
+     - anb1
+     - anb2
+     - anb3
+   tasks:
+     - name: Create multiple users
+       user: name={{ item }} state=present
+       with_items: "{{ users }}"
+       groups: testadmin
+       append: yes

@@ -1,0 +1,16 @@
+---
+ - hosts: localhost
+   connection: local
+   tasks:
+    - name: Launch first aws instance usin ansible playbook
+      ec2:
+       key_name: devops
+       instance_type: t2.micro
+       image: ami-0cd3dfa4e37921605
+       wait: yes
+       group: default
+       region: us-east-2
+       count: 1
+       vpc_subnet_id: subnet-265b9a6a
+       assign_public_ip: yes
+   

@@ -1,0 +1,16 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   vars:
+     mine:
+      - s1
+      - s2
+      - s3
+   tasks:
+   - user:
+      name: anb1
+      shell: /bin/bash
+      groups: {{ item }}
+      with_items: "{{ mine }}"
+      append: yes

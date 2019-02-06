@@ -1,0 +1,11 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+    - name: Install vsftpd pkg
+      yum: name=vsftpd state=absent
+      register: output
+    - debug:
+        msg: "Installtion completed"
+      when: output.changed == true

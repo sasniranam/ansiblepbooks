@@ -1,0 +1,9 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+    - name: Install vsftpd pkg
+      yum: name=vsftpd state=absent
+    - debug:
+        msg: "unInstalltion Success"

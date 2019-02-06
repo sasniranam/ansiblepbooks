@@ -1,0 +1,5 @@
+[server-repo]
+name=from ansible controller
+baseurl=ftp://192.168.0.254/pub
+enabled=0
+gpgcheck=0

@@ -1,0 +1,7 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+     - name: install apache package on server
+       yum: name=httpd state=latest

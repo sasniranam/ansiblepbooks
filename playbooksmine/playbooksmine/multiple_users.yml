@@ -1,0 +1,11 @@
+---
+ - hosts: all
+   remote_user: ansadm
+   become: true
+   tasks:
+    - name: Create multiple users
+      user:
+       name: ambu2
+    - name: Create second user
+      user:
+       name: ambu3

@@ -1,0 +1,56 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   vars_files:
+     - pk.yml
+   tasks:
+     - name: Install apache and related pkgs
+       yum: name={{ item }} state=present
+       with_items: "{{ pkgs }}"
+     - name: Start the apache service
+       service: name=httpd state=restarted
+     - name: copy httpd.conf from anscontrol to ansclient
+       copy: src=files/httpd.conf.orig dest=/etc/httpd/conf/httpd.conf
+     #  notify:
+      #  - restart httpd
+     #- name: Change the ownership of root apache folder
+      # file:
+       #  path: /var/www
+        # owner: apache
+         #group: apache
+     - name: Change the ownership of root apache folder
+       shell: /bin/chown -R apache:apache /var/www
+     #- name: Clone the git repo in apache root folder
+      # git:
+       #  repo: 'https://github.com/qyjohn/simple-lamp.git'
+        # dest: /var/www/html/simple-lamp
+         #force: yes
+     - name: Start the mysql service
+       service: name=mariadb state=restarted
+
+   #handlers:
+    # - name: restart httpd
+     #  service: name=httpd state=restarted
+     - mysql_user:
+        name: demouser
+        password: 12345
+        priv: '*.*:ALL,GRANT'
+        state: present
+     - name: Create a new database with name
+       mysql_db:
+        name: simple_lamp
+        #priv: '*.*:ALL,GRANT'
+        state: present
+    # - lineinfile:
+     #   path: /var/www/html/simple-lamp/config.php
+      #  regexp: '^$db_username'
+       # line: '$db_username = "demouser";'
+     #- lineinfile:
+      #  path: /var/www/html/simple-lamp/config.php
+       # regexp: '^$db_password'
+        #line: '$db_password = "12345";'
+     - name: run sql query
+       shell: cd /var/www/html/simple-lamp
+     - name: Execute te query
+       command: mysql -u demouser -p12345 simple_lamp < simple_lamp.sql

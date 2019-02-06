@@ -1,0 +1,4 @@
+[server-repo]
+name=Base repo for patcin
+baseurl=ftp://192.168.0.254/pub
+enabled=0

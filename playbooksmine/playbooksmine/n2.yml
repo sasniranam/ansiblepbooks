@@ -1,0 +1,13 @@
+- name: check registered variable for emptiness
+  hosts: all
+
+  tasks:
+
+      - name: list contents of directory
+        command: ls /mnt
+        register: contents
+
+      - name: check contents for emptiness
+        debug:
+          msg: "Directory is not empty"
+        when: contents.stdout == ""

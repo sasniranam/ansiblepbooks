@@ -1,0 +1,7 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+     - name: uninstall apache package on server
+       yum: name=httpd state=absent

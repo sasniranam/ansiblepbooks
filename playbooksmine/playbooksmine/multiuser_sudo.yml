@@ -1,0 +1,15 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   vars_files:
+     - vari.yml
+   tasks:
+     - name: create a user and provide sudo
+       user: name={{ item }} state=present
+       with_items: "{{ userlists }}"
+     - name: Add users to sudo
+       lineinfile:
+         path: /etc/sudoers
+         line: '{{ item}} ALL=(ALL)       NOPASSWD: ALL'
+       with_items: "{{ userlists }}"

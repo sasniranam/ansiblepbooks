@@ -1,0 +1,114 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   vars_files:
+    - users_list.yml
+   tasks:
+    - name: Add a group to the client systems
+      group: name=linuxadmins state=present
+      tags: 
+       - addgroup
+    - name: Add multiple users to the clients
+      user: name={{ item }} state=present
+      with_items: "{{ multuser }}"
+      tags:
+       - addmultipleusers
+    - name: generate ssh key for user
+      user: 
+       name: muser1
+       generate_ssh_key: yes
+       ssh_key_bits: 2048
+       ssh_key_file: .ssh/id_rsa
+      tags:
+       - sshkeygeneration
+    - name: delete multiple users
+      user: name={{ item }} state=absent remove=yes
+      with_items: "{{ multuser }}"
+      tags:
+       - deleteusers
+    - name: Temp sudo file creation
+      shell: sudo cp /etc/sudoers /tmp/sudoers.temp.file && sudo cp -f /etc/sudoers /etc/sudoers.bkp.orinal
+      tags:
+       - sudobackup
+    - name: add user to sudo file
+      lineinfile:
+        path: /etc/sudoers
+        line: "muser1 ALL=(ALL)       NOPASSWD: ALL"
+      tags:
+       - addusertosudo
+    - name: add mutlusers to sudo
+      lineinfile:
+        path: /etc/sudoers
+        line: "{{ item }} ALL=(ALL)       NOPASSWD: ALL"
+      with_items: "{{ multuser }}"
+      tags:
+       - addmultusertosudo
+    - name: sudoers file validation
+      shell: /usr/sbin/visudo -cf /tmp/sudoers.temp.file
+      tags:
+       - sudofilevalidation
+    - name: add a hosts entry to /etc/hosts file
+      lineinfile:
+        path: /etc/hosts
+        line: "192.168.1.200    anscontrols.example.com  anscontrols"
+        state: present
+      tags:
+       - addhostsentry
+    - name: Start cron service on client
+      service:
+        name: crond
+        state: started
+        enabled: yes
+      tags:
+       - startcrondonclient 
+    - name: Install dialog rpm on client
+      yum: name=dialog state=latest
+      tags:
+       - installrpm
+    - name: Remove rpm from client
+      yum: name=dialog state=absent
+      tags:
+       - removerpm
+    - name: Restart the system
+      command: shutdown -r +1
+      async: 0
+      poll: 0
+      ignore_errors: true
+      tags:
+       - reboothost
+    - name: Pause for 5 mins
+      pause:
+        minutes: 2
+      tags: reboothost
+    - name: Check the ssh connectivity
+      local_action:
+        module: wait_for
+        host: "{{ ansible_hostname }}"
+        port: 22
+        delay: 15
+        timeout: 300
+        state: started
+      tags: sshok 
+    - name: Install nfs on clients
+      yum: name=nfs-utils  state=latest
+      tags: installnfs
+    - name: Mount the filesystem
+      mount:
+       path: /mnt
+       src: /dev/sdb1
+       fstype: xfs
+       opts: rw
+       state: mounted
+      tags: mountfsonclient
+    - name: Allow cron for user muser3
+      file: 
+       path: /etc/cron.allow
+       state: touch
+      tags: cronadd
+    - name: Add users to cron
+      lineinfile:
+       path: /etc/cron.allow
+       line: muser3
+       state: present
+      tags: cronforuser

@@ -1,0 +1,12 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   vars_files:
+     - vari.yml
+   tasks:
+    - name: create users
+      user:
+       name: create te list of users
+       user: name={{ item }} state=present
+      with_items: "{{ userlists }}"

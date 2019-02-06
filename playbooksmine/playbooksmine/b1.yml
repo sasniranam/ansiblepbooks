@@ -1,0 +1,18 @@
+---
+ - hosts: all
+   remote_user: ansadm
+   become: true
+   become_method: sudo
+   tasks:
+     - name: To add multiple users to client
+       user: name={{ item }} state=absent
+       with_items:
+         - qa1
+         - qa2
+         - qa3
+     - name: Add multiple groups to the client
+       group: name={{ item }} state=absent
+       with_items:
+         - gp1
+         - gp2
+         - gp3

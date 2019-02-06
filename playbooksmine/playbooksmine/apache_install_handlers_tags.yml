@@ -1,0 +1,30 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+     - name: copy te repor file from anscontrol
+       copy: src=files/server.repo dest=/etc/yum.repos.d/server.repo
+       tags:
+         - repocopy
+     - name: install apache package on server
+       yum: name=httpd state=latest
+       tags:
+         - installapache
+     - name: copy httpd.conf from anscontrol to ansclient
+       copy: src=files/httpd.conf.orig dest=/etc/httpd/conf/httpd.conf
+       notify: 
+        - restart apache 
+       tags:
+        - copyconfile
+     - name: copy index.tml file from ansserver
+       copy: src=files/index.html.orig dest=/var/www/html/index.html
+       tags:
+        - copyindex
+     - name: start the ttpd service
+       service: name=httpd state=started
+       tags:
+        - startapache
+   handlers: 
+       - name: restart apache
+         service: name=httpd state=restarted

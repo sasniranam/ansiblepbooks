@@ -1,0 +1,9 @@
+---
+ - hosts: all
+   remote_user: ansadm
+   become: true
+   tasks:
+     - name: create 1 user using playbook
+       user:
+        name: ambu1
+        state: present

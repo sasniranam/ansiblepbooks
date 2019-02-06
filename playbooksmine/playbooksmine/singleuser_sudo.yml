@@ -1,0 +1,10 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+     - name: create a user and provide sudo
+       user: name=user1 state=present
+     - lineinfile:
+         path: /etc/sudoers
+         line: 'user1 ALL=(ALL)       NOPASSWD: ALL'

@@ -1,0 +1,47 @@
+---
+ - hosts: linux
+   remote_user: ansadm
+   become: true
+   tasks:
+    - name: Copy te repo files from repo server to clients
+      copy: src=files/server.repo dest=/etc/yum.repos.d/server.repo
+      
+    - name: Check if any apps or non-root process are runnin hexcepy system process
+      shell: if ps -aef | awk '{ print $1 }'| egrep -v "root|dbus|chrony|polkitd|postfix|UID|ansadm";then echo 'process_running';else echo 'process_not_running';fi
+      ignore_errors: true
+      register: apps_precheck_status
+    - fail:
+       msg: "{{ ansible_hostname }} have running process"
+      when: apps_precheck_status.stdout == 'process_running'
+    - name: Install the OS patches if apps or db services are not running
+      yum: name=* state=latest
+      register: yum_update_status
+    - name: Check if kernel is upgraded or not
+      shell: KERNEL_NEW=$(rpm -qa --last kernel | head -1 | awk '{print $1}' | sed 's/kernel-//');KERNEL_OLD=$(uname -r);if [[ $KERNEL_NEW != $KERNEL_OLD ]]; then echo 'Reboot_required'; else echo 'Reboot_not_required'; fi 
+      ignore_errors: true
+      register: reboot_status
+    - name: Restart the system
+      command: shutdown -r +1
+      async: 0
+      poll: 0
+      ignore_errors: true
+      when: reboot_status.stdout == 'Reboot_required'
+      tags:
+       - reboothost
+    - name: Pause for 5 mins
+      pause:
+        minutes: 2
+      tags: reboothost
+    - name: Check the ssh connectivity
+      local_action:
+        module: wait_for
+        host: "{{ ansible_hostname }}"
+        port: 22
+        delay: 15
+        timeout: 300
+        state: started
+      tags: sshok
+    - name: Check the patchin status
+      debug: 
+       msg: "{{ ansible_hostname }} successfully patched"
+      when: yum_update_status.changed == false and reboot_status.changed == true

@@ -1,0 +1,15 @@
+---
+pkgs:
+ - httpd
+ - php
+ - php-mysql
+ - php-gd
+ - php-ldap
+ - php-mbstring
+ - php-odbc
+ - php-xml
+ - php-xmlrpc
+ - git
+ - mariadb-server
+ - mariadb
+ - MySQL-python

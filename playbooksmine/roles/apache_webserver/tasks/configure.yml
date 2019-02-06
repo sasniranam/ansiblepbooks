@@ -1,0 +1,8 @@
+---
+ - name: Copy httpd.conf to target machines
+   copy: src=files/httpd.conf.orig dest=/etc/httpd/conf/httpd.conf
+   notify:
+     - restart apache
+
+ - name: Copy index.html
+   copy: src=files/index.html.orig dest=/var/www/html/index.html
